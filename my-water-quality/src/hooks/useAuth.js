@@ -1,6 +1,6 @@
 // src/hooks/useAuth.js
 import { useState, useEffect } from 'react';
-import { authService } from '../services/supabaseClient';
+import { supabase, authService } from '../services/supabaseClient';
 
 export function useAuth() {
   const [user, setUser] = useState(null);
