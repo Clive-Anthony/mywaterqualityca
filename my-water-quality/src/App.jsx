@@ -3,6 +3,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { validateSupabaseSetup } from './utils/validateSupabase';
+import { useEffect } from 'react';
+import { supabase } from './services/supabaseClient';
 
 // Pages
 import HomePage from './pages/Home';
@@ -21,6 +24,43 @@ import CartPage from './pages/Cart';
 import NotFoundPage from './pages/NotFound';
 
 export default function App() {
+
+  // Add this connection test function
+
+const testSupabaseConnection = async () => {
+  try {
+    console.log("Testing Supabase connection...");
+    
+    // Log environment variables (be careful not to expose in production)
+    console.log('Supabase URL configured:', !!import.meta.env.VITE_SUPABASE_URL);
+    console.log('Supabase key configured:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+    
+    // Test if we can connect to Supabase with a simple query
+    const { data, error } = await supabase.from('test_kits').select('id').limit(1);
+    
+    if (error) {
+      console.error('Supabase connection test error:', error);
+      return false;
+    }
+    
+    console.log('Supabase connection successful!', data);
+    return true;
+  } catch (err) {
+    console.error('Supabase connection test exception:', err);
+    return false;
+  }
+
+};
+
+useEffect(() => {
+  // Test Supabase connection when the app loads
+  testSupabaseConnection().then(isConnected => {
+    console.log('Supabase connection test result:', isConnected);
+  });
+}, []);
+
+  validateSupabaseSetup().then(isValid => console.log('Supabase setup valid:', isValid));
+  
   return (
     <Router>
       <AuthProvider>

@@ -49,26 +49,34 @@ export function AuthProvider({ children }) {
   }
 
   // Sign up with email and password
-  async function signUp({ email, password, ...metadata }) {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata, // Store additional user data like name
+  // UPDATED implementation - ensure metadata is correctly formatted:
+async function signUp({ email, password, ...metadata }) {
+  try {
+    setLoading(true);
+    console.log("Signup metadata:", metadata); // Debug log
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: metadata.first_name || '',
+          last_name: metadata.last_name || '',
+          full_name: metadata.full_name || `${metadata.first_name || ''} ${metadata.last_name || ''}`.trim()
         }
-      });
+      }
+    });
 
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Signup error details:", error); // More detailed error logging
+    setError(error.message);
+    throw error;
+  } finally {
+    setLoading(false);
   }
+}
 
   // Sign in with email and password
   async function signIn({ email, password, remember = false }) {

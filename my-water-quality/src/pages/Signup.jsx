@@ -1,8 +1,10 @@
-// src/pages/Signup.jsx
+// Fix 5: Update src/pages/Signup.jsx to use the proper import and fix the signUp call
+
+// src/pages/Signup.jsx - Update the import
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { XCircle, User, Mail, Lock } from 'lucide-react'; 
-import { useAuth } from '../hooks/useAuth';
+import useAuth from '../hooks/useAuth'; // Updated import
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 
@@ -18,6 +20,7 @@ export default function SignupPage() {
   const { signUp, signInWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
 
+  // Updated signUp function with better logging
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
@@ -40,12 +43,25 @@ export default function SignupPage() {
     }
     
     try {
-      // Sign up with Supabase
-      await signUp(email, password, {
+      console.log('Starting signup process with:', { 
+        email, 
+        firstName, 
+        lastName,
+        passwordLength: password.length 
+      });
+      
+      // Fixed parameter structure for signUp
+      const params = {
+        email: email,
+        password: password,
         first_name: firstName,
         last_name: lastName,
         full_name: `${firstName} ${lastName}`.trim()
-      });
+      };
+      
+      console.log('Calling signUp with params structure:', Object.keys(params));
+      const result = await signUp(params);
+      console.log('Signup result:', result);
       
       // Redirect to verification page
       navigate('/verification', { state: { email } });

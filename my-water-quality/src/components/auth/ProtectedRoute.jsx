@@ -1,7 +1,10 @@
+// Fix 2: Update src/components/auth/ProtectedRoute.jsx to import correctly
+
 // src/components/auth/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+// Update the import to match the export in useAuth.js
+import useAuth from '../../hooks/useAuth';
 
 // Component to protect routes that require authentication
 export default function ProtectedRoute({ children }) {
