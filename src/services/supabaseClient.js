@@ -114,8 +114,8 @@ export const testKitsService = {
   getFeaturedTestKits: async () => {
     const { data, error } = await supabase
       .from('test_kits')
-      .select('*')
-      .eq('featured', true);
+      .select('*');
+      // .eq('featured', true);
       
     if (error) throw error;
     return data;
