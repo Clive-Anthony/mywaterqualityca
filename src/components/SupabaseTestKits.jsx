@@ -118,7 +118,7 @@ const SupabaseTestKits = () => {
   const handleAddToCart = async (testKit) => {
     try {
       await addToCart(testKit.id, 1);
-      alert(`Added ${testKit.name} to cart!`);
+    //   alert(`Added ${testKit.name} to cart!`);
     } catch (err) {
       console.error('Error adding to cart:', err);
       alert('Failed to add to cart');
