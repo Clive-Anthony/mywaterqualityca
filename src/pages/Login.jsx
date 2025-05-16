@@ -1,6 +1,6 @@
-// src/pages/Login.jsx
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+// src/pages/Login.jsx - Using window.location for navigation
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { XCircle, Mail, Lock } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 import Navbar from '../components/layout/Navbar';
@@ -12,7 +12,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const navigate = useNavigate();
+  // Check if user is already logged in on component mount
+  useEffect(() => {
+    const checkUserAuth = async () => {
+      console.log('Checking for existing session...');
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        console.log('User already logged in, redirecting to dashboard...');
+        window.location.href = '/dashboard';
+      }
+    };
+    
+    checkUserAuth();
+  }, []);
   
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -34,7 +46,11 @@ export default function LoginPage() {
         password
       });
       
-      console.log('Sign in response:', { data, error: signInError });
+      console.log('Sign in response:', { 
+        success: !!data?.user, 
+        user: data?.user ? data.user.id : null,
+        error: signInError ? signInError.message : null
+      });
       
       if (signInError) {
         throw signInError;
@@ -42,20 +58,19 @@ export default function LoginPage() {
       
       if (data?.user) {
         console.log('Login successful for user:', data.user.id);
+        console.log('Redirecting to dashboard...');
         
-        // Sleep briefly to ensure auth state propagates
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Navigate programmatically to dashboard
-        console.log('Navigating to dashboard...');
-        navigate('/dashboard');
+        // Add a brief delay before redirecting
+        setTimeout(() => {
+          // Use window.location for a hard redirect
+          window.location.href = '/dashboard';
+        }, 500);
       } else {
         throw new Error('No user data returned');
       }
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials and try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -153,14 +168,18 @@ export default function LoginPage() {
               </div>
             </form>
 
-            {/* Login debugging info - remove in production */}
-            {loading && (
-              <div className="mt-4 p-4 bg-yellow-50 rounded-md">
-                <p className="text-xs text-yellow-700">
-                  If login takes too long, please check the console for errors and try again.
-                </p>
-              </div>
-            )}
+            {/* Manual redirection section */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-500 mb-2">
+                If you're already logged in but not redirected:
+              </p>
+              <button 
+                onClick={() => window.location.href = '/dashboard'}
+                className="w-full text-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100"
+              >
+                Go to Dashboard Manually
+              </button>
+            </div>
           </div>
         </div>
       </div>
