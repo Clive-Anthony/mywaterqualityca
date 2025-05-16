@@ -3,10 +3,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Droplet, ShoppingCart, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useCart } from '../../hooks/useCart';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { cart, setIsCartOpen } = useCart();
+  const cartItemCount = cart?.items?.length || 0;
   
   const { user, signOut, loading } = useAuth();
   const navigate = useNavigate();
@@ -67,13 +70,18 @@ export default function Navbar() {
             {user ? (
               <>
                 {/* Cart Button */}
-                <Link
-                  to="/cart"
-                  className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <span className="sr-only">View cart</span>
-                  <ShoppingCart className="h-6 w-6" aria-hidden="true" />
-                </Link>
+                <button
+                onClick={() => setIsCartOpen(true)}
+                className="p-1 relative rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <span className="sr-only">View cart</span>
+                <ShoppingCart className="h-6 w-6" aria-hidden="true" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
                 
                 {/* Profile dropdown */}
                 <div className="ml-3 relative">
