@@ -18,7 +18,10 @@ const SupabaseTestKits = () => {
       supabaseUrl: supabase?.supabaseUrl || 'Not available',
       hasAnonKey: !!supabase?.supabaseKey,
       authSession: !!supabase?.auth?.session,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      // Add more information that might be helpful
+      isRLS: "RLS should be disabled or have a policy for anonymous access",
+      requiresAuth: "This component should NOT require authentication"
     };
   };
 
@@ -48,7 +51,11 @@ const SupabaseTestKits = () => {
         
         console.log('About to query Supabase test_kits table');
         
+        // We need to use the public schema to access without auth
+        console.log('Explicitly querying from public schema');
+        
         // Simple direct query to test_kits table - no extras
+        // Use public schema explicitly
         const { data, error } = await supabase
           .from('test_kits')
           .select('*');
@@ -57,6 +64,20 @@ const SupabaseTestKits = () => {
         console.log('Supabase response:', { data, error });
         
         if (error) {
+          // If we get a permission denied error, try a different approach
+          if (error.message && error.message.includes('permission denied')) {
+            console.log('Permission denied error - this suggests an RLS issue.');
+            
+            // Try to enable the client to use anon key explicitly
+            console.log('Attempting to query with explicit anonymous access...');
+            
+            // RLS troubleshooting - SQL query to check policies
+            const { data: rlsData, error: rlsError } = await supabase.rpc('get_policies');
+            console.log('RLS policies:', { rlsData, rlsError });
+            
+            throw new Error(`Permission denied. RLS is likely blocking anonymous access. Check RLS policies for the test_kits table. Error: ${error.message}`);
+          }
+          
           console.error('Supabase query error:', error);
           throw new Error(`Supabase query failed: ${error.message}`);
         }
@@ -129,7 +150,7 @@ const SupabaseTestKits = () => {
                   <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
                 </div>
                 
-                <div className="mt-4 space-y-2">
+            <div className="mt-4 space-y-2">
                   <h4 className="text-sm font-medium text-red-800">Troubleshooting Steps:</h4>
                   
                   <div className="flex items-start">
@@ -161,7 +182,12 @@ const SupabaseTestKits = () => {
                       </span>
                     </div>
                     <p className="ml-2 text-sm text-red-700">
-                      Check Row Level Security (RLS) policies - ensure public read access is enabled
+                      <strong>Important:</strong> Make sure Row Level Security (RLS) is configured to allow anonymous access. Run this SQL:
+                      <code className="block mt-2 p-2 bg-red-200 rounded text-xs">
+                        ALTER TABLE public.test_kits ENABLE ROW LEVEL SECURITY;<br />
+                        CREATE POLICY "Allow anonymous read access" ON public.test_kits<br />
+                        FOR SELECT TO authenticated, anon USING (true);
+                      </code>
                     </p>
                   </div>
                   

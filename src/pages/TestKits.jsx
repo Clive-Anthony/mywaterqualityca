@@ -48,8 +48,19 @@ export default function TestKitsPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Test Kits</h2>
           
           <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Grid View</h3>
-            <p className="text-gray-500 mb-6">Card-based view of test kits with add to cart functionality:</p>
+            <div className="mb-6">
+              <div className="flex items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Test Kits from Supabase</h3>
+                <span className="ml-3 px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                  Available to all users
+                </span>
+              </div>
+              <p className="text-gray-500">
+                These water testing kits are loaded directly from our database and should be visible
+                to both authenticated and anonymous users. If you're seeing an error message about
+                RLS (Row Level Security), you may need to update your Supabase permissions.
+              </p>
+            </div>
             <SupabaseTestKits />
           </div>
         </div>
