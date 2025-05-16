@@ -1,15 +1,28 @@
-// Fix 2: Update src/components/auth/ProtectedRoute.jsx to import correctly
-
 // src/components/auth/ProtectedRoute.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-// Update the import to match the export in useAuth.js
-import useAuth from '../../hooks/useAuth';
+import { supabase } from '../../services/supabaseClient';
 
 // Component to protect routes that require authentication
 export default function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const location = useLocation();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        setUser(data.session?.user || null);
+      } catch (error) {
+        console.error('Error checking auth session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+  }, []);
 
   // Show loading state while checking authentication
   if (loading) {
@@ -24,10 +37,12 @@ export default function ProtectedRoute({ children }) {
 
   // Redirect to login if not authenticated
   if (!user) {
+    console.log('User not authenticated, redirecting to login');
     // Store the location they were trying to go to
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If authenticated, render the protected component
+  console.log('User authenticated, rendering protected route');
   return children;
 }
